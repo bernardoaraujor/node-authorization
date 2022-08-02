@@ -217,10 +217,17 @@ pub mod pallet {
                             "Error: failed to decode PeerId at {:?}",
                             now,
                         ),
-                        Ok(node) => sp_io::offchain::set_authorized_nodes(
-                            Self::get_authorized_nodes(&PeerId(node)),
-                            true,
-                        ),
+                        Ok(node) => {
+                            let node_peer_id = &PeerId(node);
+
+                            // only call set_authorized_nodes if storage is already written to
+                            if Self::get_authorized_nodes(node_peer_id).len() > 0 {
+                                sp_io::offchain::set_authorized_nodes(
+                                    Self::get_authorized_nodes(node_peer_id),
+                                    true,
+                                )
+                            }
+                        }
                     }
                 }
             }
